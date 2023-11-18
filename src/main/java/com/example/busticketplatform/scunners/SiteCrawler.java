@@ -1,11 +1,15 @@
 package com.example.busticketplatform.scunners;
 
+import com.example.busticketplatform.serialize.Source;
+import com.example.busticketplatform.serialize.TaskSerializer;
 import com.example.busticketplatform.web.HttpResponse;
 import com.example.busticketplatform.web.link.Link;
 import com.example.busticketplatform.web.services.RestService;
 import lombok.Getter;
 import org.slf4j.Logger;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -18,15 +22,21 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static com.example.busticketplatform.scunners.TaskState.collected;
+import static com.example.busticketplatform.scunners.TaskState.created;
+import static com.example.busticketplatform.scunners.TaskState.updated;
+import static com.example.busticketplatform.scunners.TaskState.values;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class SiteCrawler implements CollectorCrawler {
     private static final Logger log = getLogger(SiteCrawler.class);
 
     private final RestService restService;
-    protected final BlockingQueue<CrawlerTask<?>> tasks;
+    private final TaskSerializer taskSerializer;
+    private final Source source;
+    protected final BlockingQueue<CrawlerTask<?>> runningTasks;
     private final Map<String, CrawlerTask<?>> queueTasks;
-    private final Queue<CrawlerTask<?>> uncomplitedTasks;
+    private final Queue<CrawlerTask<?>> incompleteTasks;
     private final Map<String, CrawlerTask<?>> cachedTasks;
 
     public final int unitCount;
@@ -37,79 +47,125 @@ public abstract class SiteCrawler implements CollectorCrawler {
     private final AtomicLong endWorkingTime;
     private final AtomicLong maxUnitWorkingTime;
     private final AtomicLong restartTime;
+    private final AtomicLong lastMessageTime;
 
     @Getter
     private final AtomicBoolean isWorking;
 
+    private final Map<TaskState, AtomicLong> statesStatistics;
+
+    private final Map<String, Task> tasks = new ConcurrentHashMap<>();
     private final Map<String, Task> currentTasks = new ConcurrentHashMap<>();
+
+    private ScheduledExecutorService unitExecutorService;
+    private ScheduledExecutorService requestExecutorService;
+
+    private final boolean isRestartAfterFail;
 
     public SiteCrawler(CrawlerConfig config) {
         this.restService = config.getRestService();
+        this.taskSerializer = config.getTaskSerializer();
+        this.source = config.getSource();
         this.unitCount = config.getUnitCount();
         this.limitOfRequest = config.getLimitRequests();
         this.restartTime = config.getMeaningfulRestartTime();
         this.maxUnitWorkingTime = config.getMaxUnitWorkingTime();
         this.pauseRequest = config.getPauseRequest();
+        this.isRestartAfterFail = config.isRestart();
         this.startWorkingTime = new AtomicLong();
         this.endWorkingTime = new AtomicLong();
+        this.lastMessageTime = new AtomicLong();
         this.isWorking = new AtomicBoolean();
 
-        this.tasks = new ArrayBlockingQueue<>(this.limitOfRequest);
+        this.statesStatistics = new ConcurrentHashMap<>();
+
+        this.runningTasks = new ArrayBlockingQueue<>(this.limitOfRequest * this.unitCount);
         this.queueTasks = new ConcurrentHashMap<>();
         this.cachedTasks = new ConcurrentHashMap<>();
-        this.uncomplitedTasks = new ConcurrentLinkedQueue<>();
+        this.incompleteTasks = new ConcurrentLinkedQueue<>();
     }
 
     public void run() {
         log.info("Start crawle data {}", Thread.currentThread());
         startWorkingTime.set(System.currentTimeMillis());
+        lastMessageTime.set(0);
         preStartScan();
         handleStart();
 
-        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(unitCount);
-        executorService.scheduleWithFixedDelay(() -> {
+        this.unitExecutorService = Executors.newScheduledThreadPool(unitCount);
+        unitExecutorService.scheduleWithFixedDelay(() -> {
             fillTasksIfNeed();
 
-            ScheduledExecutorService requestExecutor = Executors.newScheduledThreadPool(limitOfRequest);
-            requestExecutor.scheduleWithFixedDelay(() -> {
-                CrawlerTask<?> task = tasks.poll();
-                if (task == null) {
-                    return;
-                }
-                HttpResponse taskResponse = restService.execute(task.getLink());
+            if (requestExecutorService == null) {
+                this.requestExecutorService = Executors.newScheduledThreadPool(limitOfRequest);
+                requestExecutorService.scheduleWithFixedDelay(() -> {
+                    CrawlerTask<?> task = runningTasks.poll();
+                    if (task == null) {
+                        return;
+                    }
+                    HttpResponse taskResponse = restService.execute(task.getLink());
 
-                if (!taskResponse.getStatus().is2xxSuccessful()) {
-                    log.warn("Exeption via processing task {} status {} wll restart", task, taskResponse.getStatus());
-                    queueTasks.put(task.getUrl(), task);
-                } else {
-                    cachedTasks.put(task.getUrl(), task);
-                    task.getPostProcess().accept(taskResponse);
-                }
-                requestExecutor.shutdown();
-            }, 0L, pauseRequest, TimeUnit.MILLISECONDS);
+                    if (!taskResponse.getStatus().is2xxSuccessful()) {
+                        log.warn("Exeption via processing task {} status {}", task, taskResponse.getStatus());
+                        if (isRestartAfterFail) {
+                            queueTasks.put(task.getUrl(), task);
+                        }
+                    } else {
+                        log.debug("Handle response {}", taskResponse);
+                        lastMessageTime.set(System.currentTimeMillis());
+                        cachedTasks.put(task.getUrl(), task);
+                        task.getPostProcess().accept(taskResponse);
+                    }
+                    if (CollectionUtils.isEmpty(runningTasks) && requestExecutorService.isShutdown()) {
+                        log.debug("Shutdown request executor");
+                        requestExecutorService.shutdown();
+                    }
+                }, 0L, pauseRequest, TimeUnit.MILLISECONDS);
+            }
 
 
-            if ((tasks.isEmpty() && queueTasks.isEmpty()) || needToEnd()) {
-                isWorking.set(false);
+            if ((runningTasks.isEmpty() && queueTasks.isEmpty() && isLastMessageLongWait()) || needToEnd()) {
                 endWorkingTime.set(System.currentTimeMillis());
-                uncomplitedTasks.addAll(queueTasks.values());
+                incompleteTasks.addAll(queueTasks.values());
                 log.info("End scan: " + endWorkingTime.get());
-                log.info("Collected task: " + cachedTasks.size());
                 queueTasks.clear();
                 cachedTasks.clear();
-                executorService.shutdown();
+                beforeWriteState();
+                unitExecutorService.shutdown();
             }
-        }, 0L, pauseRequest, TimeUnit.MILLISECONDS);
+        }, 0L, 1L, TimeUnit.MILLISECONDS);
 
+
+    }
+
+    private boolean isLastMessageLongWait() {
+        return lastMessageTime.get() > 0 && lastMessageTime.get() + TimeUnit.SECONDS.toMillis(10) < System.currentTimeMillis();
     }
 
     protected void preStartScan() {
-        uncomplitedTasks.forEach(task -> queueTasks.put(task.getUrl(), task));
-        uncomplitedTasks.clear();
+        if (source == null) {
+            throw new RuntimeException("Unknown source value");
+        }
+        Map<String, Task> restoredTasks = taskSerializer.readTasks(source);
+        tasks.putAll(restoredTasks);
+
+        Arrays.stream(values())
+              .forEach(state -> statesStatistics.put(state, new AtomicLong()));
+
+        incompleteTasks.forEach(task -> queueTasks.put(task.getUrl(), task));
+        incompleteTasks.clear();
+    }
+
+    private void beforeWriteState() {
+        StringBuilder message = new StringBuilder();
+        setInfoMessage(message);
+        log.info(message.toString());
+        taskSerializer.storeTasks(tasks, source);
     }
 
     public boolean needToRun() {
-        return endWorkingTime.get() + restartTime.get() < System.currentTimeMillis() && !isWorking.get();
+        return startWorkingTime.get() == 0
+              || (endWorkingTime.get() + restartTime.get() < System.currentTimeMillis() && endWorkingTime.get() > startWorkingTime.get());
     }
 
     private boolean needToEnd() {
@@ -121,18 +177,26 @@ public abstract class SiteCrawler implements CollectorCrawler {
             cachedTasks.keySet().forEach(queueTasks::remove);
         }
 
-        if (tasks.size() < limitOfRequest && !queueTasks.isEmpty()) {
-            for (int i = tasks.size(); i < limitOfRequest; i++) {
+        if (runningTasks.size() < limitOfRequest && !queueTasks.isEmpty()) {
+            for (int i = runningTasks.size(); i < limitOfRequest * unitCount; i++) {
                 CrawlerTask<?> task = queueTasks.remove(queueTasks.keySet().stream().findFirst().orElse(""));
                 if (task == null) {
                     break;
                 }
-                tasks.add(task);
+                runningTasks.add(task);
             }
         }
     }
 
     protected void putTask(Task task) {
+        increment(collected);
+
+        if (tasks.containsKey(task.getId())) {
+            increment(updated);
+        } else {
+            increment(created);
+            tasks.put(task.getId(), task);
+        }
         currentTasks.put(task.getId(), task);
     }
 
@@ -146,6 +210,31 @@ public abstract class SiteCrawler implements CollectorCrawler {
 
     public String getStringName() {
         return "%s-%s".formatted(getClass().toString(), unitCount);
+    }
+
+    public void appendTasksStatistics(StringBuilder sb) {
+        statesStatistics.forEach((key, value) -> {
+            sb.append(key).append(": ").append(value);
+            appendNewLine(sb);
+        });
+    }
+
+    public void setInfoMessage(StringBuilder message) {
+        appendNewLine(message);
+        message.append("==Tasks==");
+        appendNewLine(message);
+        message.append("All tasks: ").append(tasks.size());
+        appendNewLine(message);
+        appendTasksStatistics(message);
+    }
+
+    public void appendNewLine(StringBuilder sb) {
+        sb.append("\n");
+    }
+
+    public long increment(TaskState state) {
+        return statesStatistics.get(state)
+              .incrementAndGet();
     }
 
 }

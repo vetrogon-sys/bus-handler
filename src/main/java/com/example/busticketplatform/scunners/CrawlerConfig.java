@@ -1,5 +1,6 @@
 package com.example.busticketplatform.scunners;
 
+import com.example.busticketplatform.serialize.Source;
 import com.example.busticketplatform.serialize.TaskSerializer;
 import com.example.busticketplatform.web.services.RestService;
 import lombok.Getter;
@@ -12,26 +13,25 @@ import java.util.concurrent.atomic.AtomicLong;
 @Getter
 @Component
 public final class CrawlerConfig {
-    public static final long ONE_MINUTE = TimeUnit.MINUTES.toMillis(1);
-    public static final long FIVE_MINUTES = TimeUnit.MINUTES.toMillis(5);
-    public static final long TEN_MINUTES = TimeUnit.MINUTES.toMillis(10);
-
     private final RestService restService;
     private final TaskSerializer taskSerializer;
+    private Source source;
     private AtomicLong maxUnitWorkingTime;
     private AtomicLong meaningfulRestartTime;
     private long pauseRequest;
     private int limitRequests;
     private int unitCount;
+    private boolean restart;
 
     public CrawlerConfig(RestService restService, TaskSerializer taskSerializer) {
         this.restService = restService;
         this.taskSerializer = taskSerializer;
-        this.maxUnitWorkingTime = new AtomicLong(FIVE_MINUTES);
-        this.meaningfulRestartTime = new AtomicLong(TEN_MINUTES);
+        this.maxUnitWorkingTime = new AtomicLong(ModelConstants.FIVE_MINUTES);
+        this.meaningfulRestartTime = new AtomicLong(ModelConstants.TEN_MINUTES);
         this.pauseRequest = 1L;
         this.limitRequests = 1;
         this.unitCount = 1;
+        this.restart = false;
     }
 
     public CrawlerConfig setMaxUnitWorkingTime(long maxUnitWorkingTime) {
@@ -62,6 +62,16 @@ public final class CrawlerConfig {
         if (unitCount > 0) {
             this.unitCount = unitCount;
         }
+        return this;
+    }
+
+    public CrawlerConfig setSource(Source source) {
+        this.source = source;
+        return this;
+    }
+
+    public CrawlerConfig setRestart(boolean restart) {
+        this.restart = restart;
         return this;
     }
 

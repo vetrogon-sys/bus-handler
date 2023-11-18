@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.SneakyThrows;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.parser.Parser;
@@ -18,8 +19,9 @@ public class HttpResponse {
 
     private String body;
 
+    @SneakyThrows
     public JsonNode json() {
-        return JSON_MAPPER.valueToTree(this.body);
+        return JSON_MAPPER.readTree(this.body);
     }
 
     public Document html() {

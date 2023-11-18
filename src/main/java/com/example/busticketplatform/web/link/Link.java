@@ -19,6 +19,11 @@ public class Link {
 
     private @Nullable String body;
 
+    public Link(String url) {
+        this.url = url;
+        this.method = HttpMethod.GET;
+    }
+
     @Override
     public String toString() {
         return method + "+'" + url + "'" + (body != null ? "-data-row: " + body : "");

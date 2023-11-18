@@ -7,8 +7,8 @@ import java.util.Map;
 
 public interface TaskSerializer {
 
-    void storeTasks(Map<String, Task> tasks, Source source, SiteCrawler crawler);
+    void storeTasks(Map<String, Task> tasks, Source source);
 
-    Map<String, Task> readTasks(Source source, SiteCrawler crawler);
+    Map<String, Task> readTasks(Source source);
 
 }
