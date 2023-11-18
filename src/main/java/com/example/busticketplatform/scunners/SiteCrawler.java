@@ -125,13 +125,16 @@ public abstract class SiteCrawler implements CollectorCrawler {
 
 
             if ((runningTasks.isEmpty() && queueTasks.isEmpty() && isLastMessageLongWait()) || needToEnd()) {
-                endWorkingTime.set(System.currentTimeMillis());
+                unitExecutorService.shutdown();
                 incompleteTasks.addAll(queueTasks.values());
-                log.info("End scan: " + endWorkingTime.get());
                 queueTasks.clear();
                 cachedTasks.clear();
                 beforeWriteState();
-                unitExecutorService.shutdown();
+                endWorkingTime.set(System.currentTimeMillis());
+                if (needToEnd()) {
+                    log.info("Exit by unit timeout {}", maxUnitWorkingTime.get());
+                }
+                log.info("End scan: " + endWorkingTime.get());
             }
         }, 0L, 1L, TimeUnit.MILLISECONDS);
 
