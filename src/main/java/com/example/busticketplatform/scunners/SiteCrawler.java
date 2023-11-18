@@ -211,10 +211,6 @@ public abstract class SiteCrawler implements CollectorCrawler {
         return crawlerTask;
     }
 
-    public String getStringName() {
-        return "%s-%s".formatted(getClass().toString(), unitCount);
-    }
-
     public void appendTasksStatistics(StringBuilder sb) {
         statesStatistics.forEach((key, value) -> {
             sb.append(key).append(": ").append(value);
