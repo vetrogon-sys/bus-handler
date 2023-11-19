@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class AtlasSiteCrawler extends SiteCrawler {
@@ -31,11 +32,11 @@ public class AtlasSiteCrawler extends SiteCrawler {
 
     public AtlasSiteCrawler(RestService restService, TaskSerializer taskSerializer) {
         super(new CrawlerConfig(restService, taskSerializer)
-              .setLimitRequests(10)
               .setUnitCount(2)
+              .setLimitRequests(3)
+              .setPauseRequest(500L, TimeUnit.MILLISECONDS)
               .setMaxUnitWorkingTime(ModelConstants.FIVE_MINUTES)
               .setMeaningfulRestartTime(ModelConstants.TEN_MINUTES)
-              .setPauseRequest(500)
               .setSource(Source.atlas)
         );
     }

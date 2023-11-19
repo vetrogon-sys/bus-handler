@@ -19,6 +19,7 @@ public final class CrawlerConfig {
     private AtomicLong maxUnitWorkingTime;
     private AtomicLong meaningfulRestartTime;
     private long pauseRequest;
+    private TimeUnit pauseUnitType;
     private int limitRequests;
     private int unitCount;
     private boolean restart;
@@ -28,7 +29,8 @@ public final class CrawlerConfig {
         this.taskSerializer = taskSerializer;
         this.maxUnitWorkingTime = new AtomicLong(ModelConstants.FIVE_MINUTES);
         this.meaningfulRestartTime = new AtomicLong(ModelConstants.TEN_MINUTES);
-        this.pauseRequest = 1L;
+        this.pauseRequest = 100L;
+        this.pauseUnitType = TimeUnit.MILLISECONDS;
         this.limitRequests = 1;
         this.unitCount = 1;
         this.restart = false;
@@ -44,9 +46,10 @@ public final class CrawlerConfig {
         return this;
     }
 
-    public CrawlerConfig setPauseRequest(long pauseRequest) {
+    public CrawlerConfig setPauseRequest(long pauseRequest, TimeUnit timeUnit) {
         if (pauseRequest > 1) {
             this.pauseRequest = pauseRequest;
+            this.pauseUnitType = timeUnit;
         }
         return this;
     }

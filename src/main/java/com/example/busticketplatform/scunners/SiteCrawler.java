@@ -16,6 +16,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -58,7 +59,6 @@ public abstract class SiteCrawler implements CollectorCrawler {
     private final Map<String, Task> currentTasks = new ConcurrentHashMap<>();
 
     private ScheduledExecutorService unitExecutorService;
-    private ScheduledExecutorService requestExecutorService;
 
     private final boolean isRestartAfterFail;
 
@@ -93,12 +93,12 @@ public abstract class SiteCrawler implements CollectorCrawler {
         handleStart();
 
         this.unitExecutorService = Executors.newScheduledThreadPool(unitCount);
-        unitExecutorService.scheduleWithFixedDelay(() -> {
-            fillTasksIfNeed();
+        unitExecutorService.scheduleAtFixedRate(() -> {
 
-            if (requestExecutorService == null) {
-                this.requestExecutorService = Executors.newScheduledThreadPool(limitOfRequest);
-                requestExecutorService.scheduleWithFixedDelay(() -> {
+            fillTasksIfNeed();
+            ExecutorService requestExecutor = Executors.newCachedThreadPool();
+            for (int i = 0; i < limitOfRequest; i++) {
+                requestExecutor.submit(() -> {
                     CrawlerTask<?> task = runningTasks.poll();
                     if (task == null) {
                         return;
@@ -116,13 +116,8 @@ public abstract class SiteCrawler implements CollectorCrawler {
                         cachedTasks.put(task.getUrl(), task);
                         task.getPostProcess().accept(taskResponse);
                     }
-                    if (CollectionUtils.isEmpty(runningTasks) && requestExecutorService.isShutdown()) {
-                        log.debug("Shutdown request executor");
-                        requestExecutorService.shutdown();
-                    }
-                }, 0L, pauseRequest, TimeUnit.MILLISECONDS);
+                });
             }
-
 
             if ((runningTasks.isEmpty() && queueTasks.isEmpty() && isLastMessageLongWait()) || needToEnd()) {
                 unitExecutorService.shutdown();
@@ -136,8 +131,7 @@ public abstract class SiteCrawler implements CollectorCrawler {
                 }
                 log.info("End scan: " + endWorkingTime.get());
             }
-        }, 0L, 1L, TimeUnit.MILLISECONDS);
-
+        }, 0L, pauseRequest, TimeUnit.MILLISECONDS);
 
     }
 
