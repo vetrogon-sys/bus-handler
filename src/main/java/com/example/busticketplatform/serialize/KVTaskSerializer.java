@@ -89,11 +89,13 @@ public class KVTaskSerializer implements TaskSerializer {
                 taskMap = new HashMap<>((Map<String, Task>) ois.readObject());
                 ois.close();
             }
+            log.info("Restored {} tasks", taskMap.size());
+            cache.clear();
+            cache.putAll(taskMap);
+            storeObject(String.valueOf(cache.hashCode()), source, getFileNameForSourceAndCrawler(source, source.name()));
         } catch (IOException | ClassNotFoundException e) {
             log.error("Error via read tasks");
         }
-        log.info("Restored {} tasks", taskMap.size());
-        cache.putAll(taskMap);
         return taskMap;
     }
 

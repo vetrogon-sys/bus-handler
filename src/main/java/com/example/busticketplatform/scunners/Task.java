@@ -1,5 +1,6 @@
 package com.example.busticketplatform.scunners;
 
+import com.example.busticketplatform.utl.EpochUtil;
 import lombok.Builder;
 import lombok.Data;
 
@@ -49,7 +50,7 @@ public class Task implements Serializable {
     }
 
     public Task date(String date, String pattern) {
-        this.date = String.valueOf(LocalDateTime.parse(date, DateTimeFormatter.ofPattern(pattern)).atZone(ZoneId.of(DEFAULT_TIME_ZONE)).toInstant().toEpochMilli());
+        this.date = String.valueOf(EpochUtil.getEpochFromDate(date, pattern));
         return param(DATE, this.date);
     }
 
