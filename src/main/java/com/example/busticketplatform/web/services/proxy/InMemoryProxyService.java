@@ -80,7 +80,7 @@ public class InMemoryProxyService implements ProxyService {
                     restrictedProxies.computeIfAbsent(checkProxyLink, s -> new ArrayList<>())
                           .add(proxyInstance.country);
                     restService.setRestTemplate(null);
-                    log.info("Restricted proxy {}, {}", proxyTask, checkProxyResponse.string());
+                    log.info("Restricted proxy {}, {}", proxyInstance, checkProxyResponse.string());
                 }
             }
         }
