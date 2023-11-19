@@ -5,9 +5,10 @@ import com.example.busticketplatform.serialize.TaskSerializer;
 import com.example.busticketplatform.web.HttpResponse;
 import com.example.busticketplatform.web.link.Link;
 import com.example.busticketplatform.web.services.RestService;
+import com.example.busticketplatform.web.services.proxy.CheckProxySettings;
+import com.example.busticketplatform.web.services.proxy.ProxyService;
 import lombok.Getter;
 import org.slf4j.Logger;
-import org.springframework.util.CollectionUtils;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -32,7 +33,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 public abstract class SiteCrawler implements CollectorCrawler {
     private static final Logger log = getLogger(SiteCrawler.class);
 
-    private final RestService restService;
+    private final ProxyService proxyService;
+    private final CheckProxySettings checkProxySettings;
     private final TaskSerializer taskSerializer;
     private final Source source;
     protected final BlockingQueue<CrawlerTask<?>> runningTasks;
@@ -63,7 +65,6 @@ public abstract class SiteCrawler implements CollectorCrawler {
     private final boolean isRestartAfterFail;
 
     public SiteCrawler(CrawlerConfig config) {
-        this.restService = config.getRestService();
         this.taskSerializer = config.getTaskSerializer();
         this.source = config.getSource();
         this.unitCount = config.getUnitCount();
@@ -72,6 +73,8 @@ public abstract class SiteCrawler implements CollectorCrawler {
         this.maxUnitWorkingTime = config.getMaxUnitWorkingTime();
         this.pauseRequest = config.getPauseRequest();
         this.isRestartAfterFail = config.isRestart();
+        this.proxyService = config.getProxyService();
+        this.checkProxySettings = config.getCheckProxySettings();
         this.startWorkingTime = new AtomicLong();
         this.endWorkingTime = new AtomicLong();
         this.lastMessageTime = new AtomicLong();
@@ -86,6 +89,16 @@ public abstract class SiteCrawler implements CollectorCrawler {
     }
 
     public void run() {
+        RestService restService;
+        if (checkProxySettings != null) {
+            restService = proxyService.buildTemplateWithProxy(checkProxySettings);
+            if (restService == null) {
+                log.warn("Can't find proxy");
+                return;
+            }
+        } else {
+            restService = proxyService.buildTemplateWithoutProxy();
+        }
         log.info("Start crawle data {}", Thread.currentThread());
         startWorkingTime.set(System.currentTimeMillis());
         lastMessageTime.set(0);

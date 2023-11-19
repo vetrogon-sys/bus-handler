@@ -4,6 +4,7 @@ import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
 import java.util.Objects;
@@ -18,6 +19,8 @@ public class Link {
     private HttpMethod method;
 
     private @Nullable String body;
+
+    private HttpHeaders headers;
 
     public Link(String url) {
         this.url = url;

@@ -3,6 +3,7 @@ package com.example.busticketplatform.scunners;
 import com.example.busticketplatform.utl.EpochUtil;
 import lombok.Builder;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -86,6 +87,10 @@ public class Task implements Serializable {
     public Task param(String key, String value) {
         params.put(key, value);
         return this;
+    }
+
+    public String getParam(String key) {
+        return params.getOrDefault(key, StringUtils.EMPTY);
     }
 
     @Override

@@ -9,7 +9,8 @@ import com.example.busticketplatform.serialize.TaskSerializer;
 import com.example.busticketplatform.web.HttpResponse;
 import com.example.busticketplatform.web.link.Link;
 import com.example.busticketplatform.web.link.LinkBuilder;
-import com.example.busticketplatform.web.services.RestService;
+import com.example.busticketplatform.web.services.proxy.CheckProxySettings;
+import com.example.busticketplatform.web.services.proxy.ProxyService;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.stereotype.Service;
 
@@ -30,11 +31,14 @@ public class AtlasSiteCrawler extends SiteCrawler {
 
     public static final int COLLECTED_DAYS_COUNT = 3;
 
-    public AtlasSiteCrawler(RestService restService, TaskSerializer taskSerializer) {
-        super(new CrawlerConfig(restService, taskSerializer)
-              .setUnitCount(2)
-              .setLimitRequests(3)
-              .setPauseRequest(500L, TimeUnit.MILLISECONDS)
+    public static final CheckProxySettings CHECK_PROXY_SETTINGS = new CheckProxySettings("Атлас | Удобная покупка билетов на маршрутки и автобусы по всей Беларуси")
+          .link(ORIGIN);
+
+    public AtlasSiteCrawler(ProxyService proxyService, TaskSerializer taskSerializer) {
+        super(new CrawlerConfig(proxyService, taskSerializer)
+              .setUnitCount(1)
+              .setCheckProxySettings(CHECK_PROXY_SETTINGS)
+              .setPauseRequest(1500L, TimeUnit.MILLISECONDS)
               .setMaxUnitWorkingTime(ModelConstants.FIVE_MINUTES)
               .setMeaningfulRestartTime(ModelConstants.TEN_MINUTES)
               .setSource(Source.atlas)

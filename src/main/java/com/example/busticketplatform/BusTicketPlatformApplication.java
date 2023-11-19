@@ -15,9 +15,4 @@ public class BusTicketPlatformApplication {
 		SpringApplication.run(BusTicketPlatformApplication.class, args);
 	}
 
-	@Bean
-	public RestTemplate restTemplate() {
-		return new RestTemplateBuilder().build();
-	}
-
 }

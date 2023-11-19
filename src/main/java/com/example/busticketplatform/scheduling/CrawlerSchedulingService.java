@@ -15,7 +15,7 @@ public class CrawlerSchedulingService {
 
     @Scheduled(fixedDelay = 1000)
     public void schedule() {
-        collectorCrawlers.stream()
+        collectorCrawlers.parallelStream()
               .filter(SiteCrawler::needToRun)
               .forEach(SiteCrawler::run);
     }

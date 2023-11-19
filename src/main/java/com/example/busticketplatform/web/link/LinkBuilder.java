@@ -1,11 +1,14 @@
 package com.example.busticketplatform.web.link;
 
 import jakarta.annotation.Nullable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 public class LinkBuilder {
@@ -15,6 +18,8 @@ public class LinkBuilder {
     List<Parameter> params;
 
     @Nullable String body;
+
+    Map<String, List<String>> headers = new HashMap<>();
 
     public LinkBuilder(String uri) {
         this.uri = uri;
@@ -46,6 +51,17 @@ public class LinkBuilder {
         return this;
     }
 
+    public LinkBuilder addHeader(String key, String value) {
+        headers.computeIfAbsent(key, s -> new ArrayList<>())
+              .add(value);
+        return this;
+    }
+
+    public LinkBuilder putHeader(String key, String value) {
+        headers.put(key, new ArrayList<>(List.of(value)));
+        return this;
+    }
+
     public Link build() {
         StringBuilder url = new StringBuilder(uri);
         if (!CollectionUtils.isEmpty(params)) {
@@ -57,7 +73,11 @@ public class LinkBuilder {
                 }
             });
         }
-        return new Link(url.toString(), method, body);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        if (!headers.isEmpty()) {
+            headers.forEach(httpHeaders::addAll);
+        }
+        return new Link(url.toString(), method, body, httpHeaders);
     }
 
 }

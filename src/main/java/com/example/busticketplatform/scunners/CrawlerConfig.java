@@ -2,9 +2,9 @@ package com.example.busticketplatform.scunners;
 
 import com.example.busticketplatform.serialize.Source;
 import com.example.busticketplatform.serialize.TaskSerializer;
-import com.example.busticketplatform.web.services.RestService;
+import com.example.busticketplatform.web.services.proxy.CheckProxySettings;
+import com.example.busticketplatform.web.services.proxy.ProxyService;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
@@ -13,19 +13,20 @@ import java.util.concurrent.atomic.AtomicLong;
 @Getter
 @Component
 public final class CrawlerConfig {
-    private final RestService restService;
+    private final ProxyService proxyService;
     private final TaskSerializer taskSerializer;
     private Source source;
     private AtomicLong maxUnitWorkingTime;
     private AtomicLong meaningfulRestartTime;
     private long pauseRequest;
     private TimeUnit pauseUnitType;
+    private CheckProxySettings checkProxySettings;
     private int limitRequests;
     private int unitCount;
     private boolean restart;
 
-    public CrawlerConfig(RestService restService, TaskSerializer taskSerializer) {
-        this.restService = restService;
+    public CrawlerConfig(ProxyService proxyService, TaskSerializer taskSerializer) {
+        this.proxyService = proxyService;
         this.taskSerializer = taskSerializer;
         this.maxUnitWorkingTime = new AtomicLong(ModelConstants.FIVE_MINUTES);
         this.meaningfulRestartTime = new AtomicLong(ModelConstants.TEN_MINUTES);
@@ -75,6 +76,11 @@ public final class CrawlerConfig {
 
     public CrawlerConfig setRestart(boolean restart) {
         this.restart = restart;
+        return this;
+    }
+
+    public CrawlerConfig setCheckProxySettings(CheckProxySettings checkProxySettings) {
+        this.checkProxySettings = checkProxySettings;
         return this;
     }
 

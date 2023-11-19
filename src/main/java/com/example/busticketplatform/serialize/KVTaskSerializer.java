@@ -20,7 +20,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class KVTaskSerializer implements TaskSerializer {
     private static final Logger log = getLogger(KVTaskSerializer.class);
 
-    private final Map<String, Task> cache = new ConcurrentHashMap<>();
+    private final Map<Source, Map<String, Task>> cache = new ConcurrentHashMap<>();
 
     @Override
     public void storeTasks(Map<String, Task> tasks, Source source) {
@@ -32,7 +32,7 @@ public class KVTaskSerializer implements TaskSerializer {
             try {
                 storeObject(tasks, source, fileName);
                 storeObject(stringHash, source, hashCodeFileName);
-                cache.putAll(tasks);
+                cache.put(source, tasks);
             } catch (IOException e) {
                 log.error("Error via store tasks");
                 return;
@@ -79,7 +79,7 @@ public class KVTaskSerializer implements TaskSerializer {
         String fileName = getFileNameForSourceAndCrawler(source, source.getCrawler().getName());
         String storedCache = getStoredCache(getFileNameForSourceAndCrawler(source, source.name()));
         if (String.valueOf(cache.hashCode()).equals(storedCache)) {
-            return cache;
+            return cache.get(source);
         }
         log.info("Start read kv {}", fileName);
         try {
@@ -90,8 +90,7 @@ public class KVTaskSerializer implements TaskSerializer {
                 ois.close();
             }
             log.info("Restored {} tasks", taskMap.size());
-            cache.clear();
-            cache.putAll(taskMap);
+            cache.put(source, taskMap);
             storeObject(String.valueOf(cache.hashCode()), source, getFileNameForSourceAndCrawler(source, source.name()));
         } catch (IOException | ClassNotFoundException e) {
             log.error("Error via read tasks");

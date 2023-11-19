@@ -16,7 +16,10 @@ public interface ModelConstants {
     String DATE = "date";
     String AVAILABLE_PLACES = "availablePlaces";
     String RIDE_LINK = "rideLink";
-
+    String PROXY_IP = "proxyIp";
+    String PROXY_PORT = "proxyPort";
+    String PROXY_COUNTRY = "proxyCountry";
+    String PROXY_PROTOCOL = "proxyProtocol";
     String DEFAULT_TIME_ZONE = "Europe/London";
 
 }
