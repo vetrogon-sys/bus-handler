@@ -34,13 +34,13 @@ public abstract class SiteCrawler implements CollectorCrawler {
     private static final Logger log = getLogger(SiteCrawler.class);
 
     private final ProxyService proxyService;
-    private final CheckProxySettings checkProxySettings;
-    private final TaskSerializer taskSerializer;
-    private final Source source;
+    protected final CheckProxySettings checkProxySettings;
+    protected final TaskSerializer taskSerializer;
+    protected final Source source;
     protected final BlockingQueue<CrawlerTask<?>> runningTasks;
-    private final Map<String, CrawlerTask<?>> queueTasks;
-    private final Queue<CrawlerTask<?>> incompleteTasks;
-    private final Map<String, CrawlerTask<?>> cachedTasks;
+    protected final Map<String, CrawlerTask<?>> queueTasks;
+    protected final Queue<CrawlerTask<?>> incompleteTasks;
+    protected final Map<String, CrawlerTask<?>> cachedTasks;
 
     public final int unitCount;
     public final int limitOfRequest;
@@ -54,11 +54,6 @@ public abstract class SiteCrawler implements CollectorCrawler {
 
     @Getter
     private final AtomicBoolean isWorking;
-
-    private final Map<TaskState, AtomicLong> statesStatistics;
-
-    private final Map<String, Task> tasks = new ConcurrentHashMap<>();
-    private final Map<String, Task> currentTasks = new ConcurrentHashMap<>();
 
     private ScheduledExecutorService unitExecutorService;
 
@@ -79,8 +74,6 @@ public abstract class SiteCrawler implements CollectorCrawler {
         this.endWorkingTime = new AtomicLong();
         this.lastMessageTime = new AtomicLong();
         this.isWorking = new AtomicBoolean();
-
-        this.statesStatistics = new ConcurrentHashMap<>();
 
         this.runningTasks = new ArrayBlockingQueue<>(this.limitOfRequest * this.unitCount);
         this.queueTasks = new ConcurrentHashMap<>();
@@ -152,26 +145,10 @@ public abstract class SiteCrawler implements CollectorCrawler {
         return lastMessageTime.get() > 0 && lastMessageTime.get() + TimeUnit.SECONDS.toMillis(10) < System.currentTimeMillis();
     }
 
-    protected void preStartScan() {
-        if (source == null) {
-            throw new RuntimeException("Unknown source value");
-        }
-        Map<String, Task> restoredTasks = taskSerializer.readTasks(source);
-        tasks.putAll(restoredTasks);
+    protected abstract void preStartScan();
 
-        Arrays.stream(values())
-              .forEach(state -> statesStatistics.put(state, new AtomicLong()));
 
-        incompleteTasks.forEach(task -> queueTasks.put(task.getUrl(), task));
-        incompleteTasks.clear();
-    }
-
-    private void beforeWriteState() {
-        StringBuilder message = new StringBuilder();
-        setInfoMessage(message);
-        log.info(message.toString());
-        taskSerializer.storeTasks(tasks, source);
-    }
+    protected abstract void beforeWriteState();
 
     public boolean needToRun() {
         return startWorkingTime.get() == 0
@@ -198,49 +175,12 @@ public abstract class SiteCrawler implements CollectorCrawler {
         }
     }
 
-    protected void putTask(Task task) {
-        increment(collected);
-
-        if (tasks.containsKey(task.getId())) {
-            increment(updated);
-        } else {
-            increment(created);
-            tasks.put(task.getId(), task);
-        }
-        currentTasks.put(task.getId(), task);
-    }
-
     protected CrawlerTask<?> addTask(Link link) {
         CrawlerTask<?> crawlerTask = CrawlerTask.builder()
               .link(link)
               .build();
         queueTasks.put(crawlerTask.getUrl(), crawlerTask);
         return crawlerTask;
-    }
-
-    public void appendTasksStatistics(StringBuilder sb) {
-        statesStatistics.forEach((key, value) -> {
-            sb.append(key).append(": ").append(value);
-            appendNewLine(sb);
-        });
-    }
-
-    public void setInfoMessage(StringBuilder message) {
-        appendNewLine(message);
-        message.append("==Tasks==");
-        appendNewLine(message);
-        message.append("All tasks: ").append(tasks.size());
-        appendNewLine(message);
-        appendTasksStatistics(message);
-    }
-
-    public void appendNewLine(StringBuilder sb) {
-        sb.append("\n");
-    }
-
-    public long increment(TaskState state) {
-        return statesStatistics.get(state)
-              .incrementAndGet();
     }
 
 }

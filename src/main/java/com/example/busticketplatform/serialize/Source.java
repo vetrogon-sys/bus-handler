@@ -1,8 +1,8 @@
 package com.example.busticketplatform.serialize;
 
 import com.example.busticketplatform.scunners.SiteCrawler;
-import com.example.busticketplatform.scunners.crawler.AtlasSiteCrawler;
-import com.example.busticketplatform.scunners.crawler.GeoNodeSiteCrawler;
+import com.example.busticketplatform.scunners.crawler.atlas.AtlasSiteCrawler;
+import com.example.busticketplatform.scunners.crawler.geonode.GeoNodeSiteCrawler;
 import lombok.Getter;
 
 public enum Source {

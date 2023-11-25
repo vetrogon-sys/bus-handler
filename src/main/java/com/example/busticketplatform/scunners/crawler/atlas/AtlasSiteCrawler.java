@@ -1,9 +1,9 @@
-package com.example.busticketplatform.scunners.crawler;
+package com.example.busticketplatform.scunners.crawler.atlas;
 
 import com.example.busticketplatform.scunners.CrawlerConfig;
 import com.example.busticketplatform.scunners.ModelConstants;
-import com.example.busticketplatform.scunners.SiteCrawler;
 import com.example.busticketplatform.scunners.Task;
+import com.example.busticketplatform.scunners.crawler.bus.TaskCollectorCrawler;
 import com.example.busticketplatform.serialize.Source;
 import com.example.busticketplatform.serialize.TaskSerializer;
 import com.example.busticketplatform.web.HttpResponse;
@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class AtlasSiteCrawler extends SiteCrawler {
+public class AtlasSiteCrawler extends TaskCollectorCrawler {
 
     public static final String DOMAIN = "atlasbus.by";
     public static final String API_ORIGIN = "https://%s/api".formatted(DOMAIN);
