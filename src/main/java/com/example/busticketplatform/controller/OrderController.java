@@ -1,7 +1,7 @@
 package com.example.busticketplatform.controller;
 
 import com.example.busticketplatform.entity.Order;
-import com.example.busticketplatform.serialize.Source;
+import com.example.busticketplatform.serialize.BusSource;
 import com.example.busticketplatform.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ public class OrderController {
 
     @PostMapping("/{source}")
     public ResponseEntity<Order> placeOrder(@PathVariable String source, @RequestBody Order order) {
-        Source orderSource = Source.valueOf(source);
+        BusSource orderSource = BusSource.valueOf(source);
         order.setSource(orderSource);
         orderService.placeOrder(order);
         return ResponseEntity.ok(order);

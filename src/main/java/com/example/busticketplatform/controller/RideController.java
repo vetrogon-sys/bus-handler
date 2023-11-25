@@ -2,7 +2,7 @@ package com.example.busticketplatform.controller;
 
 import com.example.busticketplatform.dto.Filter;
 import com.example.busticketplatform.entity.Ride;
-import com.example.busticketplatform.serialize.Source;
+import com.example.busticketplatform.serialize.BusSource;
 import com.example.busticketplatform.service.RideService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +24,13 @@ public class RideController {
 
     @GetMapping("/{source}")
     public ResponseEntity<List<Ride>> getAll(@PathVariable String source) {
-        Source sourceEnum = Source.valueOf(source);
+        BusSource sourceEnum = BusSource.valueOf(source);
         return ResponseEntity.ok(rideService.getAllRides(sourceEnum));
     }
 
     @PostMapping("/{source}")
     public ResponseEntity<List<Ride>> getAll(@PathVariable String source, @RequestBody Filter filter) {
-        Source sourceEnum = Source.valueOf(source);
+        BusSource sourceEnum = BusSource.valueOf(source);
         return ResponseEntity.ok(rideService.getRides(sourceEnum, filter));
     }
 

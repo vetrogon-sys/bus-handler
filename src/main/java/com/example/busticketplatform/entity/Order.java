@@ -1,7 +1,7 @@
 package com.example.busticketplatform.entity;
 
 import com.example.busticketplatform.dto.Filter;
-import com.example.busticketplatform.serialize.Source;
+import com.example.busticketplatform.serialize.BusSource;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,7 +10,7 @@ import lombok.Data;
 public class Order {
 
     private Long id;
-    private Source source;
+    private BusSource source;
     private Filter rideFilter;
     private Long postingDate;
     private String customerId;

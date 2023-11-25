@@ -4,7 +4,7 @@ import com.example.busticketplatform.scunners.model.config.CrawlerConfig;
 import com.example.busticketplatform.scunners.model.config.ModelConstants;
 import com.example.busticketplatform.scunners.model.entity.Task;
 import com.example.busticketplatform.scunners.crawler.tasks.TaskCollectorCrawler;
-import com.example.busticketplatform.serialize.Source;
+import com.example.busticketplatform.serialize.BusSource;
 import com.example.busticketplatform.serialize.TaskSerializer;
 import com.example.busticketplatform.web.HttpResponse;
 import com.example.busticketplatform.web.link.Link;
@@ -41,7 +41,7 @@ public class AtlasSiteCrawler extends TaskCollectorCrawler {
               .setPauseRequest(1500L, TimeUnit.MILLISECONDS)
               .setMaxUnitWorkingTime(ModelConstants.FIVE_MINUTES)
               .setMeaningfulRestartTime(ModelConstants.TEN_MINUTES)
-              .setSource(Source.atlas)
+              .setSource(BusSource.atlas)
         );
     }
 

@@ -2,7 +2,7 @@ package com.example.busticketplatform.web.services.proxy;
 
 import com.example.busticketplatform.scunners.model.config.ModelConstants;
 import com.example.busticketplatform.scunners.model.entity.Task;
-import com.example.busticketplatform.serialize.Source;
+import com.example.busticketplatform.serialize.ProxySource;
 import com.example.busticketplatform.serialize.TaskSerializer;
 import com.example.busticketplatform.web.HttpResponse;
 import com.example.busticketplatform.web.link.Link;
@@ -52,7 +52,7 @@ public class InMemoryProxyService implements ProxyService {
     }
 
     private RestTemplate buildTemplateWithProxy(CheckProxySettings checkProxySettings, RestService restService) {
-        Map<String, Task> proxyTasks = taskSerializer.readTasks(Source.geonode);
+        Map<String, Task> proxyTasks = taskSerializer.readTasks(ProxySource.geonode);
         for (Map.Entry<String, Task> entry : proxyTasks.entrySet()) {
             String id = entry.getKey();
             Task proxyTask = entry.getValue();

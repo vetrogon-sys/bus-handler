@@ -1,10 +1,10 @@
 package com.example.busticketplatform.scunners.crawler.geonode;
 
+import com.example.busticketplatform.scunners.crawler.tasks.TaskCollectorCrawler;
 import com.example.busticketplatform.scunners.model.config.CrawlerConfig;
 import com.example.busticketplatform.scunners.model.config.ModelConstants;
 import com.example.busticketplatform.scunners.model.entity.Task;
-import com.example.busticketplatform.scunners.crawler.tasks.TaskCollectorCrawler;
-import com.example.busticketplatform.serialize.Source;
+import com.example.busticketplatform.serialize.ProxySource;
 import com.example.busticketplatform.serialize.TaskSerializer;
 import com.example.busticketplatform.web.HttpResponse;
 import com.example.busticketplatform.web.link.LinkBuilder;
@@ -27,7 +27,7 @@ public class GeoNodeSiteCrawler extends TaskCollectorCrawler {
               .setPauseRequest(500L, TimeUnit.MILLISECONDS)
               .setMaxUnitWorkingTime(ModelConstants.FIVE_MINUTES)
               .setMeaningfulRestartTime(ModelConstants.TEN_MINUTES)
-              .setSource(Source.geonode)
+              .setSource(ProxySource.geonode)
         );
     }
 

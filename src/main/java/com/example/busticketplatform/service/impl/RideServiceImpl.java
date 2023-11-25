@@ -3,7 +3,7 @@ package com.example.busticketplatform.service.impl;
 import com.example.busticketplatform.dto.Filter;
 import com.example.busticketplatform.entity.Ride;
 import com.example.busticketplatform.scunners.model.entity.Task;
-import com.example.busticketplatform.serialize.Source;
+import com.example.busticketplatform.serialize.BusSource;
 import com.example.busticketplatform.serialize.TaskSerializer;
 import com.example.busticketplatform.service.RideService;
 import com.example.busticketplatform.utl.EpochUtil;
@@ -19,7 +19,7 @@ public class RideServiceImpl implements RideService {
     private final TaskSerializer taskSerializer;
 
     @Override
-    public List<Ride> getAllRides(Source source) {
+    public List<Ride> getAllRides(BusSource source) {
 
         return taskSerializer.readTasks(source).values().stream()
               .map(this::getRideFromTask)
@@ -27,7 +27,7 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    public List<Ride> getRides(Source source, Filter filter) {
+    public List<Ride> getRides(BusSource source, Filter filter) {
         return taskSerializer.readTasks(source).values().stream()
               .filter(filter::test)
               .map(this::getRideFromTask)
