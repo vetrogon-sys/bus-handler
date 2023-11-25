@@ -1,6 +1,6 @@
 package com.example.busticketplatform.serialize;
 
-import com.example.busticketplatform.scunners.SiteCrawler;
+import com.example.busticketplatform.scunners.model.SiteCrawler;
 import com.example.busticketplatform.scunners.crawler.atlas.AtlasSiteCrawler;
 import com.example.busticketplatform.scunners.crawler.geonode.GeoNodeSiteCrawler;
 import lombok.Getter;

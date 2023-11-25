@@ -1,5 +1,7 @@
-package com.example.busticketplatform.scunners;
+package com.example.busticketplatform.scunners.model;
 
+import com.example.busticketplatform.scunners.model.config.CrawlerConfig;
+import com.example.busticketplatform.scunners.model.entity.CrawlerTask;
 import com.example.busticketplatform.serialize.Source;
 import com.example.busticketplatform.serialize.TaskSerializer;
 import com.example.busticketplatform.web.HttpResponse;
@@ -10,7 +12,6 @@ import com.example.busticketplatform.web.services.proxy.ProxyService;
 import lombok.Getter;
 import org.slf4j.Logger;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -24,10 +25,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.example.busticketplatform.scunners.TaskState.collected;
-import static com.example.busticketplatform.scunners.TaskState.created;
-import static com.example.busticketplatform.scunners.TaskState.updated;
-import static com.example.busticketplatform.scunners.TaskState.values;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class SiteCrawler implements CollectorCrawler {

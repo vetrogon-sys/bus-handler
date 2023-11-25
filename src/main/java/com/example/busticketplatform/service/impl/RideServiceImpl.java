@@ -2,7 +2,7 @@ package com.example.busticketplatform.service.impl;
 
 import com.example.busticketplatform.dto.Filter;
 import com.example.busticketplatform.entity.Ride;
-import com.example.busticketplatform.scunners.Task;
+import com.example.busticketplatform.scunners.model.entity.Task;
 import com.example.busticketplatform.serialize.Source;
 import com.example.busticketplatform.serialize.TaskSerializer;
 import com.example.busticketplatform.service.RideService;

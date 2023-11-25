@@ -1,6 +1,6 @@
 package com.example.busticketplatform.serialize;
 
-import com.example.busticketplatform.scunners.Task;
+import com.example.busticketplatform.scunners.model.entity.Task;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 

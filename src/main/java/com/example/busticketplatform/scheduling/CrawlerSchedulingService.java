@@ -1,6 +1,6 @@
 package com.example.busticketplatform.scheduling;
 
-import com.example.busticketplatform.scunners.SiteCrawler;
+import com.example.busticketplatform.scunners.model.SiteCrawler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

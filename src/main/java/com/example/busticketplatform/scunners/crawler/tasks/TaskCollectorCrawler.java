@@ -1,9 +1,9 @@
-package com.example.busticketplatform.scunners.crawler.bus;
+package com.example.busticketplatform.scunners.crawler.tasks;
 
-import com.example.busticketplatform.scunners.CrawlerConfig;
-import com.example.busticketplatform.scunners.SiteCrawler;
-import com.example.busticketplatform.scunners.Task;
-import com.example.busticketplatform.scunners.TaskState;
+import com.example.busticketplatform.scunners.model.config.CrawlerConfig;
+import com.example.busticketplatform.scunners.model.SiteCrawler;
+import com.example.busticketplatform.scunners.model.entity.Task;
+import com.example.busticketplatform.scunners.model.entity.TaskState;
 import org.slf4j.Logger;
 
 import java.util.Arrays;
@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.example.busticketplatform.scunners.TaskState.*;
-import static com.example.busticketplatform.scunners.TaskState.created;
+import static com.example.busticketplatform.scunners.model.entity.TaskState.*;
+import static com.example.busticketplatform.scunners.model.entity.TaskState.created;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class TaskCollectorCrawler extends SiteCrawler {

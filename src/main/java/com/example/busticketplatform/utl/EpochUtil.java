@@ -1,6 +1,6 @@
 package com.example.busticketplatform.utl;
 
-import com.example.busticketplatform.scunners.ModelConstants;
+import com.example.busticketplatform.scunners.model.config.ModelConstants;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.regex.Pattern;
 
-import static com.example.busticketplatform.scunners.ModelConstants.DEFAULT_TIME_ZONE;
+import static com.example.busticketplatform.scunners.model.config.ModelConstants.DEFAULT_TIME_ZONE;
 
 public final class EpochUtil {
 

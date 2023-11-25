@@ -1,7 +1,6 @@
 package com.example.busticketplatform.serialize;
 
-import com.example.busticketplatform.scunners.SiteCrawler;
-import com.example.busticketplatform.scunners.Task;
+import com.example.busticketplatform.scunners.model.entity.Task;
 
 import java.util.Map;
 

@@ -1,6 +1,6 @@
 package com.example.busticketplatform.dto;
 
-import com.example.busticketplatform.scunners.Task;
+import com.example.busticketplatform.scunners.model.entity.Task;
 import com.example.busticketplatform.utl.EpochUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;

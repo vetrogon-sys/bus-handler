@@ -1,4 +1,4 @@
-package com.example.busticketplatform.scunners;
+package com.example.busticketplatform.scunners.model.config;
 
 import com.example.busticketplatform.serialize.Source;
 import com.example.busticketplatform.serialize.TaskSerializer;

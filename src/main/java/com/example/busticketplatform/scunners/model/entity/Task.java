@@ -1,20 +1,15 @@
-package com.example.busticketplatform.scunners;
+package com.example.busticketplatform.scunners.model.entity;
 
 import com.example.busticketplatform.utl.EpochUtil;
-import lombok.Builder;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.example.busticketplatform.scunners.ModelConstants.*;
+import static com.example.busticketplatform.scunners.model.config.ModelConstants.*;
 
 @Data
 public class Task implements Serializable {

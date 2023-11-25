@@ -1,4 +1,4 @@
-package com.example.busticketplatform.scunners;
+package com.example.busticketplatform.scunners.model.entity;
 
 import com.example.busticketplatform.web.HttpResponse;
 import com.example.busticketplatform.web.link.Link;
