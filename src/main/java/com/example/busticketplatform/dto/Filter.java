@@ -30,17 +30,27 @@ public class Filter {
             isTaskValid = isTaskValid && to.equals(task.getEndCity());
         }
         if (requiredPlaces != 0) {
-            isTaskValid = isTaskValid && requiredPlaces <= Integer.getInteger(task.getAvailablePlaces());
+            isTaskValid = isTaskValid && requiredPlaces <= Integer.parseInt(task.getAvailablePlaces());
         }
 
         if (StringUtils.isNoneBlank(date)) {
-            LocalDateTime filterDate = LocalDateTime.parse(date, DateTimeFormatter.ISO_DATE_TIME);
+            LocalDateTime filterDate = LocalDateTime.parse(date, DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
             LocalDateTime taskDate = EpochUtil.getDateFromEpoch(task.getDate());
 
             isTaskValid = isTaskValid && (filterDate.isBefore(taskDate) || filterDate.isEqual(taskDate));
         }
 
         return isTaskValid;
+    }
+
+    public Filter setFiled(FilterToken token, String message) {
+        switch (token) {
+            case DATE -> date = message;
+            case AVAILABLE_PLACES -> requiredPlaces = Integer.parseInt(message);
+            case CITY_FROM -> from = message;
+            case CITY_TO -> to = message;
+        }
+        return this;
     }
 
     @Override
