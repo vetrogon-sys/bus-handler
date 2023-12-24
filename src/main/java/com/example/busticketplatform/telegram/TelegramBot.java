@@ -2,6 +2,7 @@ package com.example.busticketplatform.telegram;
 
 import com.example.busticketplatform.dto.Filter;
 import com.example.busticketplatform.entity.Order;
+import com.example.busticketplatform.serialize.BusSource;
 import com.example.busticketplatform.serialize.Source;
 import com.example.busticketplatform.service.FilterService;
 import com.example.busticketplatform.service.NotificationService;
@@ -55,7 +56,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     Order order = orderService.placeOrder(Order.builder()
                           .rideFilter(filter)
                           .customerId(chatId)
-                          .source(Source.atlas)
+                          .source(BusSource.atlas)
                           .postingDate(System.currentTimeMillis())
                           .build());
                     notificationService.addNotificator(chatId, notification -> sendMessage(chatId, chatService.getNotificationMessage(notification), ParseMode.HTML));
