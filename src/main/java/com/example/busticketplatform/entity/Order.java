@@ -13,6 +13,6 @@ public class Order {
     private BusSource source;
     private Filter rideFilter;
     private Long postingDate;
-    private String customerId;
+    private Long customerId;
 
 }

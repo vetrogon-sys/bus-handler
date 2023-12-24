@@ -13,4 +13,6 @@ public interface OrderService {
 
     void sendOrder(Order order, List<Ride> rides);
 
+    void invalidateOrder(long chatId);
+
 }

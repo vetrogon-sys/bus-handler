@@ -1,17 +1,19 @@
 package com.example.busticketplatform.service;
 
 import com.example.busticketplatform.entity.Notification;
-import com.example.busticketplatform.entity.Order;
-import com.example.busticketplatform.entity.Ride;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 public interface NotificationService {
 
     void sendOrderNotification(Notification notification);
 
-    void pickNotifications();
+    String pickNotifications();
 
     boolean containsNotifications();
+
+    void addNotificator(long chatId, Consumer<Notification> notification);
+
+    void closeNotification(long chatId);
 
 }
