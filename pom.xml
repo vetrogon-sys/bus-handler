@@ -11,8 +11,12 @@
 	<groupId>com.example</groupId>
 	<artifactId>bus-ticket-platform</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
 	<name>bus-ticket-platform</name>
 	<description>Demo project for Spring Boot</description>
+	<modules>
+		<module>scanners</module>
+	</modules>
 
 	<properties>
 		<java.version>17</java.version>

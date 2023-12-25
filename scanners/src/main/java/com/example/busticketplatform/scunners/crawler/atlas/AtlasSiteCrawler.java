@@ -37,8 +37,9 @@ public class AtlasSiteCrawler extends TaskCollectorCrawler {
     public AtlasSiteCrawler(ProxyService proxyService, TaskSerializer taskSerializer) {
         super(new CrawlerConfig(proxyService, taskSerializer)
               .setUnitCount(1)
+              .setLimitRequests(10)
 //              .setCheckProxySettings(CHECK_PROXY_SETTINGS)
-              .setPauseRequest(1500L, TimeUnit.MILLISECONDS)
+//              .setPauseRequest(1500L, TimeUnit.MILLISECONDS)
               .setMaxUnitWorkingTime(ModelConstants.FIVE_MINUTES)
               .setMeaningfulRestartTime(ModelConstants.TEN_MINUTES)
               .setSource(BusSource.atlas)
